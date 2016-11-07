@@ -1,26 +1,23 @@
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
+import java.rmi.RemoteException;
 
 /**
  * Created by Plinio on 07.11.2016.
  */
 public class MainServer{
     public static void main(String[] args) throws Exception {
-        ServerSocket s = new ServerSocket(8080);
-        while (true) {
-            Socket soc = s.accept();
-            BufferedReader plec = new BufferedReader(new InputStreamReader(soc.getInputStream()));
-            PrintWriter pred = new PrintWriter(new BufferedWriter(new OutputStreamWriter(soc.getOutputStream())), true);
-            while (true) {
-                String str = plec.readLine();
-                if (str.equals("END"))
-                    break;
-                pred.println(str);
-            }
-            plec.close();
-            pred.close();
-            soc.close();
+        try{
+            ICalculatrice skeleton = (ICalculatrice) UnicastRemoteObject.exportObject(new Calculatrice(), 6000);
+            Registry registry = LocateRegistry.createRegistry(6000);
+            registry.rebind("Calculatrice", skeleton);
+        }
+        catch (Exception ex){
+            ex.printStackTrace();
         }
     }
 }
